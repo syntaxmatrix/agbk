@@ -446,7 +446,7 @@ const registerUserGoogle = asyncHandler(async (req, res) => {
     const statusCode = error instanceof APIError ? error.statusCode : 500;
     return res
       .status(statusCode)
-      .redirect(`${process.env.DOMAIN}/error?message=${encodeURIComponent(errorMessage)}`);
+      .redirect(`${process.env.FRONTEND_DOMAIN}/error?message=${encodeURIComponent(errorMessage)}`);
   }
 });
 
