@@ -55,6 +55,14 @@ app.use(
     secret: process.env.SECRET, // Replace with a strong secret
     resave: false,
     saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === "production", // Only send over HTTPS in production
+      httpOnly: true, // Prevent client-side JS access
+      // CRITICAL FOR CROSS-ORIGIN:
+      sameSite: "Lax", // Allow cross-site cookies
+      maxAge: 1000 * 60 * 15, // 15 minutes (adjust as needed)
+      domain: process.env.DOMAIN,
+    },
   })
 );
 
