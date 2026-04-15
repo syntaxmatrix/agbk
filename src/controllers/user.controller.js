@@ -138,7 +138,7 @@ const registerUser = asyncHandler(async (req, res) => {
     securityCodeExpiry,
   });
 
-  console.log("Registered User:", user); /// #DebugOnly #Remove Must
+  // console.log("Registered User:", user); /// #DebugOnly #Remove Must
 
   // Fetch created user without sensitive data
   const createdUser = await User.findById(user._id).select(
@@ -295,7 +295,7 @@ const loginUser = asyncHandler(async (req, res) => {
   );
 
   // console.log("Login Route End", "Generated Tokens: ", { accessToken, refreshToken }); #DebugOnly
-
+    console.log("Login Route End"); 
   return res
     .status(200)
     // Set auth cookies for session-based API access.
@@ -411,7 +411,7 @@ const registerUserGoogle = asyncHandler(async (req, res) => {
         }
       );
 
-      console.log("Google OAuth User Upsert Result:", result); // #DebugOnly
+      // console.log("Google OAuth User Upsert Result:", result); // #DebugOnly
       // console.log("Google OAuth User Upsert ResultValue:", result.value); // #DebugOnly
       // console.log("Google OAuth User Upsert ResultLastErrorObject:", result.lastErrorObject); // #DebugOnly
       const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(result.value._id);
@@ -507,12 +507,9 @@ const getMe = asyncHandler(async (req, res) => {
 const gmailLink = asyncHandler(async (req, res) => {
   try {
     // Log received session data for debugging
-    console.log(
-      "googleLink - req.session.emailForGoogleLink:",
-      req.session?.emailForGoogleLink
-    );
-    console.log("googleLink - req.session.state:", req.session?.state);
-    console.log("googleLink - req.query.state:", req.query?.state);
+    // console.log("googleLink - req.session.emailForGoogleLink:", req.session?.emailForGoogleLink );
+    // console.log("googleLink - req.session.state:", req.session?.state);
+    // console.log("googleLink - req.query.state:", req.query?.state);
 
     const email = req.session?.emailForGoogleLink; // Get email from session
 
@@ -530,7 +527,7 @@ const gmailLink = asyncHandler(async (req, res) => {
     // Handle the OAuth 2.0 server response
     let q = url.parse(req.url, true).query;
 
-    console.log("url query received:", q);
+    // console.log("url query received:", q);
 
     if (q.error) {
       // An error response e.g. error=access_denied
@@ -644,7 +641,7 @@ const sendSecurityCodeLogged = asyncHandler(async (req, res) => {
   // req.user comes from auth middleware; only logged users can use this route.
   const user = req.user; // middleware incoming
 
-  console.log(user);
+  // console.log(user); #DebugOnly
 
   const email = user.email;
   const name = user.name;
