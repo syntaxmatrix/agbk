@@ -72,6 +72,6 @@ Recommended Platforms:
 
 ---
 
-## License
+## License 
 
 MIT
