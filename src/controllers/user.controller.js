@@ -50,6 +50,7 @@ const cookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
   sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+  domain: process.env.NODE_ENV === "production" ? process.env.COOKIE_DOMAIN : undefined,
 };
 
 /**
@@ -166,6 +167,7 @@ const registerUser = asyncHandler(async (req, res) => {
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     maxAge: 1000 * 60 * 15, // 15 min expiry for tempToken
+    domain: process.env.NODE_ENV === "production" ? process.env.COOKIE_DOMAIN : undefined,
   };
   console.log("Regsiter Route End");
   return res
@@ -432,7 +434,7 @@ const registerUserGoogle = asyncHandler(async (req, res) => {
     // Persist local auth cookies after Google login/upsert.
     .cookie("accessToken", accessToken, cookieOptions)
     .cookie("refreshToken", refreshToken, cookieOptions)
-    .redirect(`${process.env.DOMAIN}/chats?message=${encodeURIComponent(messageSuccess)}`);
+    .redirect(`${process.env.FRONTEND_DOMAIN}/chats?message=${encodeURIComponent(messageSuccess)}`);
     }
   } catch (error) {
     console.error("Error In Google Linking:", error);
@@ -606,7 +608,7 @@ const gmailLink = asyncHandler(async (req, res) => {
         httpOnly: true,
         secure: true,
         sameSite: "Lax",
-        domain: process.env.NODE_ENV === "production" ? process.env.COOKIE_DOMAIN : undefined
+        domain: process.env.NODE_ENV === "production" ? process.env.FRONTEND_DOMAIN : undefined
       };
       console.log("Linking Google Route End");
       return res
@@ -614,7 +616,7 @@ const gmailLink = asyncHandler(async (req, res) => {
         // Issue fresh auth cookies and redirect with linked state.
         .cookie("accessToken", accessToken, options)
         .cookie("refreshToken", refreshToken, options)
-        .redirect(`${process.env.DOMAIN}?linked=true`);
+        .redirect(`${process.env.FRONTEND_DOMAIN}?linked=true`);
     }
   } catch (error) {
     console.error("Error In Google Linking:", error);
@@ -627,7 +629,7 @@ const gmailLink = asyncHandler(async (req, res) => {
     return res
       .status(statusCode)
       .redirect(
-        `${process.env.DOMAIN}?error=${encodeURIComponent(errorMessage)}`
+        `${process.env.FRONTEND_DOMAIN}?error=${encodeURIComponent(errorMessage)}`
       );
   }
 });
