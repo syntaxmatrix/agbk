@@ -1,4 +1,4 @@
-import {ProductName , emailSupport} from "../../constant.js"
+import { ProductName, emailSupport } from "../../constant.js";
 
 const generateVerificationEmailHTML = (name, verifyCode) => {
   return `

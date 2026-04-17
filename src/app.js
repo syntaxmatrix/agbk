@@ -23,7 +23,10 @@ app.use(
     origin: function (origin, callback) {
       // allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
-      if (allowedOrigins.indexOf(origin) !== -1 || process.env.CORS_ORIGIN === "*") {
+      if (
+        allowedOrigins.indexOf(origin) !== -1 ||
+        process.env.CORS_ORIGIN === "*"
+      ) {
         return callback(null, true);
       } else {
         const msg =
@@ -32,7 +35,7 @@ app.use(
       }
     },
     credentials: true, // Important for sending cookies with cross-origin requests
-  })
+  }),
 );
 
 app.get("/api/v1/hello", (req, res) => {
@@ -64,13 +67,13 @@ app.use(
       maxAge: 1000 * 60 * 15, // 15 minutes (adjust as needed)
       domain: process.env.COOKIE_DOMAIN,
     },
-  })
+  }),
 );
 
 //routes import
 import userRouter from "./routes/user.routes.js";
-import agentRouter from "./routes/agent.routes.js"
-import historyRouter from "./routes/history.routes.js"
+import agentRouter from "./routes/agent.routes.js";
+import historyRouter from "./routes/history.routes.js";
 
 //routes declarations
 app.use("/api/v1/user", userRouter); // example.com/api/v1/user/register

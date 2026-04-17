@@ -2,16 +2,16 @@ import { Resend } from "resend";
 import {
   generateVerificationEmailHTML,
   generateWelcomeEmailHTML,
-  generateSecurityEmailHTML
+  generateSecurityEmailHTML,
 } from "./email.html.js";
 import { APIError } from "../../utils/APIError.js";
-import { emailnoreply ,ProductName} from "../../constant.js";
+import { emailnoreply, ProductName } from "../../constant.js";
 
 const RESENDKEY = process.env.RESEND_API_KEY;
 
 if (!RESENDKEY) {
   throw new Error(
-    "RESEND_API_KEY is not set. Please set RESEND_API_KEY in your .env"
+    "RESEND_API_KEY is not set. Please set RESEND_API_KEY in your .env",
   );
 }
 
@@ -83,7 +83,7 @@ const sendWelcomeEmail = async (email, name) => {
   } catch (err) {
     throw new APIError(
       500,
-      `Failed to send to user welcome email: ${err.message}`
+      `Failed to send to user welcome email: ${err.message}`,
     );
   }
 };

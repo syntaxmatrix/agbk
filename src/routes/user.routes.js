@@ -12,7 +12,7 @@ import {
   registerUserGoogle,
   getEncryptedEmail,
   getMe,
-  gmailLink
+  gmailLink,
 } from "../controllers/user.controller.js";
 import { getGoogleAuthURL } from "../integrations/Auth/auth.google.js";
 import { getGmailAuthURL } from "../integrations/Auth/gmail.google.js";
@@ -36,7 +36,7 @@ router.route("/register").post(registerUser); // example.com/api/v1/user/registe
 router.route("/login").post(loginUser); // example.com/api/v1/user/login
 
 // Request Security Code(OTP) for Forget Password Only
-router.route("/otp").post(sendSecurityCodeForgetPassword)// example.com/api/v1/user/otp
+router.route("/otp").post(sendSecurityCodeForgetPassword); // example.com/api/v1/user/otp
 
 // ## Unsecured Routes #Ends
 
@@ -59,23 +59,25 @@ router.route("/passwordreset").post(passwordReset); // example.com/api/v1/user/p
 // ## Secured Routes #Starts
 
 // LOGOUT USER
-router.route("/logout").post(auth_middleware,logoutUser); // example.com/api/v1/user/logout
+router.route("/logout").post(auth_middleware, logoutUser); // example.com/api/v1/user/logout
 
 // Get current authenticated user
 router.route("/me").get(auth_middleware, getMe); // example.com/api/v1/user/me
 
 // SEND SECURITY CODE(OTP) TO LOGGED-IN USER for Sensitive Actions (like password change, etc.)
-router.route("/requestsecuritycode").post(auth_middleware,sendSecurityCodeLogged); // example.com/api/v1/user/requestsecuritycode
+router
+  .route("/requestsecuritycode")
+  .post(auth_middleware, sendSecurityCodeLogged); // example.com/api/v1/user/requestsecuritycode
 
 // ## GOOGLE GMAIL OAUTH2 #Starts
 //Step 0: EMAIL ENCRYPTION FOR GOOGLE GMAIL OAUTH2
-router.route("/email").get(auth_middleware,getEncryptedEmail); // example.com/api/v1/user/email returns encryptedEmailFromFrontend
+router.route("/email").get(auth_middleware, getEncryptedEmail); // example.com/api/v1/user/email returns encryptedEmailFromFrontend
 
 //Step 1: GOOGLE GMAIL OAUTH2 LOGIN
-router.route("/gmail").get(auth_middleware,getEmail,getGmailAuthURL); // example.com/api/v1/user/gmail?email=encodedEmail(encryptedEmailFromFrontend)
+router.route("/gmail").get(auth_middleware, getEmail, getGmailAuthURL); // example.com/api/v1/user/gmail?email=encodedEmail(encryptedEmailFromFrontend)
 
 // Step 2: GOOGLE GMAIL OAUTH2 CALLBACK
-router.route("/gmail/callback").get(auth_middleware,gmailLink); // example.com/api/v1/user/gmail/callback
+router.route("/gmail/callback").get(auth_middleware, gmailLink); // example.com/api/v1/user/gmail/callback
 
 // ## Secured Routes #Ends
 

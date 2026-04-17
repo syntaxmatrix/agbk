@@ -4,7 +4,10 @@ import { APIResponse } from "../utils/APIResponse.js";
 import User from "../models/user.model.js";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
-import { sendVerificationEmail , sendSecurityCodeMail } from "../integrations/emails/email.resend.js";
+import {
+  sendVerificationEmail,
+  sendSecurityCodeMail,
+} from "../integrations/emails/email.resend.js";
 import { oauth2Client } from "../integrations/Auth/auth.google.js";
 import { oauth2ClientGmail } from "../integrations/Auth/gmail.google.js";
 import url from "url";
@@ -33,7 +36,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
   } catch (error) {
     throw new APIError(
       500,
-      "Went Wrong while generating refresh and access token"
+      "Went Wrong while generating refresh and access token",
     );
   }
 };
@@ -50,7 +53,10 @@ const cookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
   sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-  domain: process.env.NODE_ENV === "production" ? process.env.COOKIE_DOMAIN : undefined,
+  domain:
+    process.env.NODE_ENV === "production"
+      ? process.env.COOKIE_DOMAIN
+      : undefined,
 };
 
 /**
@@ -120,7 +126,7 @@ const registerUser = asyncHandler(async (req, res) => {
     // Store only email in temp token for OTP verification step.
     { email }, // generating using email
     process.env.SECRET,
-    { expiresIn: process.env.TEMP_TOKEN_EXPIRY }
+    { expiresIn: process.env.TEMP_TOKEN_EXPIRY },
   );
 
   //Adding Default Name
@@ -142,7 +148,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // Fetch created user without sensitive data
   const createdUser = await User.findById(user._id).select(
-    "-password -refreshToken -inviteCode"
+    "-password -refreshToken -inviteCode",
   );
   if (!createdUser) {
     throw new APIError(500, "Unable to retrieve user data after registration");
@@ -157,7 +163,7 @@ const registerUser = asyncHandler(async (req, res) => {
     console.error(`Email sending failed: ${err.message}`);
     throw new APIError(
       500,
-      "User registered but failed to send verification email"
+      "User registered but failed to send verification email",
     );
   }
 
@@ -167,20 +173,25 @@ const registerUser = asyncHandler(async (req, res) => {
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     maxAge: 1000 * 60 * 15, // 15 min expiry for tempToken
-    domain: process.env.NODE_ENV === "production" ? process.env.COOKIE_DOMAIN : undefined,
+    domain:
+      process.env.NODE_ENV === "production"
+        ? process.env.COOKIE_DOMAIN
+        : undefined,
   };
   console.log("Regsiter Route End");
-  return res
-    .status(201)
-    // tempToken is required by /verifyemail to identify the pending user.
-    .cookie("tempToken", tempToken, tempTokenCookieOptions)
-    .json(
-      new APIResponse(
-        200,
-        [],
-        "User Registered Successfully. Verification Email Sent."
+  return (
+    res
+      .status(201)
+      // tempToken is required by /verifyemail to identify the pending user.
+      .cookie("tempToken", tempToken, tempTokenCookieOptions)
+      .json(
+        new APIResponse(
+          200,
+          [],
+          "User Registered Successfully. Verification Email Sent.",
+        ),
       )
-    );
+  );
 });
 
 /**
@@ -255,11 +266,13 @@ const verifyEmailID = asyncHandler(async (req, res) => {
     // Save changes to database
     await user.save({ validateBeforeSave: false }); // Set validateBeforeSave to false if verifyCode/Expiry are being unset
 
-    return res
-      .status(200)
-      // Clear tempToken after success so OTP flow cannot be replayed.
-      .clearCookie("tempToken", cookieOptions)
-      .json(new APIResponse(200, {}, "User is successfully verified"));
+    return (
+      res
+        .status(200)
+        // Clear tempToken after success so OTP flow cannot be replayed.
+        .clearCookie("tempToken", cookieOptions)
+        .json(new APIResponse(200, {}, "User is successfully verified"))
+    );
   }
   throw new APIError(400, "Invalid verification code");
 });
@@ -291,17 +304,19 @@ const loginUser = asyncHandler(async (req, res) => {
 
   // Generate accessToken, refreshToken
   const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
-    user._id
+    user._id,
   );
 
   // console.log("Login Route End", "Generated Tokens: ", { accessToken, refreshToken }); #DebugOnly
-    console.log("Login Route End"); 
-  return res
-    .status(200)
-    // Set auth cookies for session-based API access.
-    .cookie("accessToken", accessToken, cookieOptions)
-    .cookie("refreshToken", refreshToken, cookieOptions)
-    .json(new APIResponse(200, {}, "You are successfully Logged In "));
+  console.log("Login Route End");
+  return (
+    res
+      .status(200)
+      // Set auth cookies for session-based API access.
+      .cookie("accessToken", accessToken, cookieOptions)
+      .cookie("refreshToken", refreshToken, cookieOptions)
+      .json(new APIResponse(200, {}, "You are successfully Logged In "))
+  );
 });
 
 /**
@@ -318,7 +333,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(
       userId,
       { refreshToken: null },
-      { validateBeforeSave: false }
+      { validateBeforeSave: false },
     );
   }
 
@@ -337,7 +352,7 @@ const logoutUser = asyncHandler(async (req, res) => {
  * @param {Object} req - Express request object.
  * @param {Object} res - Express response object.
  */
-const registerUserGoogle = asyncHandler(async (req, res) => { 
+const registerUserGoogle = asyncHandler(async (req, res) => {
   try {
     // Log received session data for debugging
     // console.log("googleLink - req.session.state:", req.session?.state); #DebugOnly
@@ -361,7 +376,7 @@ const registerUserGoogle = asyncHandler(async (req, res) => {
         "State mismatch. Possible CSRF attack. Expected:",
         req.session.state,
         "Received:",
-        q.state
+        q.state,
       );
       throw new APIError(403, "State mismatch. Possible CSRF attack.");
     } else {
@@ -400,7 +415,7 @@ const registerUserGoogle = asyncHandler(async (req, res) => {
           $set: {
             profileURL: picture,
           },
-          $setOnInsert: userData
+          $setOnInsert: userData,
         }, // The data to insert if the user doesn't exist
         {
           // Upsert means create the user on first Google login, otherwise update.
@@ -408,13 +423,14 @@ const registerUserGoogle = asyncHandler(async (req, res) => {
           new: true, // This returns the new document if created, or the existing one if found
           setDefaultsOnInsert: true, // Applies your schema's default values on creation
           includeResultMetadata: true, // Return the raw result from MongoDB to check if the document was created or found
-        }
+        },
       );
 
       // console.log("Google OAuth User Upsert Result:", result); // #DebugOnly
       // console.log("Google OAuth User Upsert ResultValue:", result.value); // #DebugOnly
       // console.log("Google OAuth User Upsert ResultLastErrorObject:", result.lastErrorObject); // #DebugOnly
-      const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(result.value._id);
+      const { accessToken, refreshToken } =
+        await generateAccessAndRefreshTokens(result.value._id);
 
       // const createdUser = await User.findById(user._id);  // #DebugOnly
 
@@ -429,12 +445,16 @@ const registerUserGoogle = asyncHandler(async (req, res) => {
         messageSuccess = "User Logged In Successfully";
       }
 
-      return res
-    .status(200)
-    // Persist local auth cookies after Google login/upsert.
-    .cookie("accessToken", accessToken, cookieOptions)
-    .cookie("refreshToken", refreshToken, cookieOptions)
-    .redirect(`${process.env.FRONTEND_DOMAIN}/chats?message=${encodeURIComponent(messageSuccess)}`);
+      return (
+        res
+          .status(200)
+          // Persist local auth cookies after Google login/upsert.
+          .cookie("accessToken", accessToken, cookieOptions)
+          .cookie("refreshToken", refreshToken, cookieOptions)
+          .redirect(
+            `${process.env.FRONTEND_DOMAIN}/chats?message=${encodeURIComponent(messageSuccess)}`,
+          )
+      );
     }
   } catch (error) {
     console.error("Error In Google Linking:", error);
@@ -446,7 +466,9 @@ const registerUserGoogle = asyncHandler(async (req, res) => {
     const statusCode = error instanceof APIError ? error.statusCode : 500;
     return res
       .status(statusCode)
-      .redirect(`${process.env.FRONTEND_DOMAIN}/error?message=${encodeURIComponent(errorMessage)}`);
+      .redirect(
+        `${process.env.FRONTEND_DOMAIN}/error?message=${encodeURIComponent(errorMessage)}`,
+      );
   }
 });
 
@@ -455,7 +477,8 @@ const registerUserGoogle = asyncHandler(async (req, res) => {
  * @param {Object} req - Express request object.
  * @param {Object} res - Express response object.
  */
-const getEncryptedEmail = asyncHandler(async (req, res) => {  // #Need to Remove
+const getEncryptedEmail = asyncHandler(async (req, res) => {
+  // #Need to Remove
   const secret = process.env.SECRET;
 
   const accessToken = req.cookies?.accessToken;
@@ -481,8 +504,8 @@ const getEncryptedEmail = asyncHandler(async (req, res) => {  // #Need to Remove
       new APIResponse(
         200,
         { email: encryptedEmail },
-        "Successfully Encrypted Email for Googgle Auth"
-      )
+        "Successfully Encrypted Email for Googgle Auth",
+      ),
     );
 });
 
@@ -497,7 +520,6 @@ const getMe = asyncHandler(async (req, res) => {
   // req.user is already selected without password and refreshToken in auth middleware
   return res.status(200).json(new APIResponse(200, { user }, "User fetched"));
 });
-
 
 /**
  * Add Gmail Credentials to existing user.
@@ -516,11 +538,11 @@ const gmailLink = asyncHandler(async (req, res) => {
     if (!email) {
       // Handle case where session data is missing or expired
       console.error(
-        "gmailLink: Email not found in session. Session might be expired or not set."
+        "gmailLink: Email not found in session. Session might be expired or not set.",
       );
       throw new APIError(
         401,
-        "Session data missing for Google Gmail linking. Please try registering again."
+        "Session data missing for Google Gmail linking. Please try registering again.",
       );
     }
 
@@ -542,7 +564,7 @@ const gmailLink = asyncHandler(async (req, res) => {
         "State mismatch. Possible CSRF attack. Expected:",
         req.session.state,
         "Received:",
-        q.state
+        q.state,
       );
       throw new APIError(403, "State mismatch. Possible CSRF attack.");
     } else {
@@ -559,23 +581,23 @@ const gmailLink = asyncHandler(async (req, res) => {
       if (!googleRefreshToken) {
         throw new APIError(
           405,
-          "Google Refresh Token Not Found in Google Response"
+          "Google Refresh Token Not Found in Google Response",
         );
       }
       if (!googleAccessToken) {
         throw new APIError(
           405,
-          "Google Access Token Not Found in Google Response"
+          "Google Access Token Not Found in Google Response",
         );
       }
-    
+
       const user = await User.findOne({ email }); // Find user using email from session
 
       if (!user) {
         console.error(`User with email ${email} not found after Google OAuth.`);
         throw new APIError(
           404,
-          "User not found in database for Google Gmail linking email."
+          "User not found in database for Google Gmail linking email.",
         );
       }
 
@@ -605,15 +627,20 @@ const gmailLink = asyncHandler(async (req, res) => {
         httpOnly: true,
         secure: true,
         sameSite: "Lax",
-        domain: process.env.NODE_ENV === "production" ? process.env.FRONTEND_DOMAIN : undefined
+        domain:
+          process.env.NODE_ENV === "production"
+            ? process.env.FRONTEND_DOMAIN
+            : undefined,
       };
       console.log("Linking Google Route End");
-      return res
-        .status(200)
-        // Issue fresh auth cookies and redirect with linked state.
-        .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", refreshToken, options)
-        .redirect(`${process.env.FRONTEND_DOMAIN}?linked=true`);
+      return (
+        res
+          .status(200)
+          // Issue fresh auth cookies and redirect with linked state.
+          .cookie("accessToken", accessToken, options)
+          .cookie("refreshToken", refreshToken, options)
+          .redirect(`${process.env.FRONTEND_DOMAIN}?linked=true`)
+      );
     }
   } catch (error) {
     console.error("Error In Google Linking:", error);
@@ -626,11 +653,10 @@ const gmailLink = asyncHandler(async (req, res) => {
     return res
       .status(statusCode)
       .redirect(
-        `${process.env.FRONTEND_DOMAIN}?error=${encodeURIComponent(errorMessage)}`
+        `${process.env.FRONTEND_DOMAIN}?error=${encodeURIComponent(errorMessage)}`,
       );
   }
 });
-
 
 /**
  * Sends Security code for Critical Actions(Logged Only).
@@ -688,7 +714,7 @@ const sendSecurityCodeForgetPassword = asyncHandler(async (req, res) => {
   if (existingToken) {
     try {
       const decoded = jwt.verify(existingToken, process.env.SECRET);
-      
+
       // Safety check: ensure the email matches the token
       if (decoded.email !== email) {
         throw new APIError(400, "Invalid session for this email");
@@ -698,10 +724,13 @@ const sendSecurityCodeForgetPassword = asyncHandler(async (req, res) => {
 
       // 2. Check if attempts are exhausted
       if (currentCnt <= 0) {
-        throw new APIError(429, "Too many attempts. Please try again after 1 hour.");
+        throw new APIError(
+          429,
+          "Too many attempts. Please try again after 1 hour.",
+        );
       }
     } catch (err) {
-      // If token is expired, we let them start over with a fresh 3 attempts 
+      // If token is expired, we let them start over with a fresh 3 attempts
       // or you can handle expiration more strictly based on your security policy.
       currentCnt = 3;
     }
@@ -714,7 +743,7 @@ const sendSecurityCodeForgetPassword = asyncHandler(async (req, res) => {
 
   // 3. Generate new code and save to User
   const verifyCodeGen = genVerificationCode();
-  const verifyCodeExpiry = new Date(Date.now() + 10 * 60 * 1000); 
+  const verifyCodeExpiry = new Date(Date.now() + 10 * 60 * 1000);
 
   user.securityCode = verifyCodeGen;
   user.securityCodeExpiry = verifyCodeExpiry;
@@ -723,11 +752,9 @@ const sendSecurityCodeForgetPassword = asyncHandler(async (req, res) => {
   // 4. Create NEW token with decremented count
   // We subtract 1 from the current count
   const nextCnt = currentCnt - 1;
-  const token_reset = jwt.sign(
-    { email, cnt: nextCnt }, 
-    process.env.SECRET, 
-    { expiresIn: process.env.TEMP_TOKEN_EXPIRY }
-  );
+  const token_reset = jwt.sign({ email, cnt: nextCnt }, process.env.SECRET, {
+    expiresIn: process.env.TEMP_TOKEN_EXPIRY,
+  });
 
   try {
     await sendVerificationEmail(email, user.name, verifyCodeGen);
@@ -739,7 +766,13 @@ const sendSecurityCodeForgetPassword = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .cookie("token_reset", token_reset, cookieOptions)
-    .json(new APIResponse(200, { attemptsLeft: nextCnt }, "Security Code sent successfully"));
+    .json(
+      new APIResponse(
+        200,
+        { attemptsLeft: nextCnt },
+        "Security Code sent successfully",
+      ),
+    );
 });
 
 /**
@@ -748,22 +781,36 @@ const sendSecurityCodeForgetPassword = asyncHandler(async (req, res) => {
  * @param {Object} res - Express response object.
  */
 const passwordReset = asyncHandler(async (req, res) => {
-
   const secret = process.env.SECRET;
 
   const accessToken = req.cookies?.accessToken;
 
   const emailtkn = req.cookies?.token_reset; // token for password forget initiation
 
-  if (!accessToken || !emailtkn) {
+  if (!accessToken && !emailtkn) {
     if (!emailtkn) {
       throw new APIError(404, "No token found for password reset initiation.");
-    } else{
-      throw new APIError(404, "No accessToken cookie found for password reset.");
+    } else {
+      throw new APIError(
+        404,
+        "No accessToken cookie found for password reset.",
+      );
     }
   }
 
-  const { email } = await jwt.verify(accessToken, secret) || await jwt.verify(emailtkn, secret);
+  let email;
+
+  try {
+    if (accessToken) {
+      const decoded = jwt.verify(accessToken, secret);
+      email = decoded.email;
+    } else if (emailtkn) {
+      const decoded = jwt.verify(emailtkn, secret);
+      email = decoded.email;
+    }
+  } catch (err) {
+    throw new APIError(401, "Invalid or expired token");
+  }
 
   if (!email) {
     throw new APIError(400, "Email ID is required");
@@ -776,7 +823,7 @@ const passwordReset = asyncHandler(async (req, res) => {
   if (!freshUser) {
     throw new APIError(400, "User not found");
   }
-  
+
   // Retrieve stored expiry from DB
   const isCodeValid =
     freshUser.securityCodeExpiry && freshUser.securityCodeExpiry > Date.now();

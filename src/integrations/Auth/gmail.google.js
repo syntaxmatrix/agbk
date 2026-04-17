@@ -5,13 +5,13 @@ import { asyncHandler } from "../../utils/asyncHandler.js";
 const oauth2ClientGmail = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
-  process.env.GMAIL_REDIRECT_URI
+  process.env.GMAIL_REDIRECT_URI,
 );
 
 // Access scopes for two non-Sign-In scopes: Read-only Drive activity and Google Calendar.
 const gmailScopes = [
   // "https://www.googleapis.com/auth/gmail.readonly",
-  "https://www.googleapis.com/auth/gmail.send"
+  "https://www.googleapis.com/auth/gmail.send",
 ];
 // Example on redirecting user to Google's OAuth 2.0 server.
 const getGmailAuthURL = asyncHandler((req, res) => {
@@ -45,4 +45,4 @@ const getGmailAuthURL = asyncHandler((req, res) => {
   res.redirect(authorizationUrl);
 });
 
-export { getGmailAuthURL, gmailScopes ,oauth2ClientGmail};
+export { getGmailAuthURL, gmailScopes, oauth2ClientGmail };

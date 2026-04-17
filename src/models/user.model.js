@@ -37,9 +37,9 @@ const userSchema = new Schema(
       { type: mongoose.Schema.Types.ObjectId, ref: "Chat", default: null },
     ],
     googleRefreshToken: { type: String, default: null },
-    googleConnected: { type: Boolean, default: false }
+    googleConnected: { type: Boolean, default: false },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Pre hooks
@@ -60,7 +60,7 @@ userSchema.methods.generateAccessToken = function () {
   return jwt.sign(
     { _id: this._id, email: this.email, name: this.name },
     process.env.SECRET,
-    { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
+    { expiresIn: process.env.ACCESS_TOKEN_EXPIRY },
   );
 };
 // Generate Refresh Token

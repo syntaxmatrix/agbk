@@ -3,7 +3,7 @@ class APIError extends Error {
     statusCode,
     message = "Something Went Wrong",
     errors = [],
-    stack = ""
+    stack = "",
   ) {
     (super(message),
       (this.statusCode = statusCode),

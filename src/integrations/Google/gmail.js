@@ -1,10 +1,9 @@
 import { google } from "googleapis";
 
-async function sendgmail(auth, to, subject, body,googleRefreshToken) {
-
+async function sendgmail(auth, to, subject, body, googleRefreshToken) {
   // Generate new Google access token from refresh token
   auth.setCredentials({ refresh_token: googleRefreshToken });
-  
+
   const gmail = google.gmail({ version: "v1", auth });
 
   const message = [
@@ -12,7 +11,7 @@ async function sendgmail(auth, to, subject, body,googleRefreshToken) {
     `Subject: ${subject}`,
     "Content-Type: text/plain; charset=utf-8",
     "",
-    body
+    body,
   ].join("\n");
 
   const encodedMessage = Buffer.from(message)
@@ -24,8 +23,8 @@ async function sendgmail(auth, to, subject, body,googleRefreshToken) {
   const res = await gmail.users.messages.send({
     userId: "me",
     requestBody: {
-      raw: encodedMessage
-    }
+      raw: encodedMessage,
+    },
   });
 
   return res.data;

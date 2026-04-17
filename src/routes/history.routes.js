@@ -1,5 +1,8 @@
 import { Router } from "express";
-import { getRecentConversations, getChatById } from "../controllers/history.controller.js";
+import {
+  getRecentConversations,
+  getChatById,
+} from "../controllers/history.controller.js";
 import { auth_middleware } from "../middlewares/auth.js";
 
 const router = Router();

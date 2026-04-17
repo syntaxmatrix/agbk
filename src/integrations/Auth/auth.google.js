@@ -2,11 +2,10 @@ import { google } from "googleapis";
 import crypto from "crypto";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 
-
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
-  process.env.GOOGLE_REDIRECT_URI
+  process.env.GOOGLE_REDIRECT_URI,
 );
 
 // Access scopes for two non-Sign-In scopes: Read-only Drive activity and Google Calendar.
@@ -38,4 +37,4 @@ const getGoogleAuthURL = asyncHandler((req, res) => {
   res.redirect(authorizationUrl);
 });
 
-export { getGoogleAuthURL , oauth2Client ,scopes};
+export { getGoogleAuthURL, oauth2Client, scopes };
