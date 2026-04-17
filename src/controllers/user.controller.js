@@ -850,6 +850,36 @@ const passwordReset = asyncHandler(async (req, res) => {
     .json(new APIResponse(200, {}, "Password changed successfully"));
 });
 
+/**
+ * Profile Update.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const profileUpdate = asyncHandler(async (req, res) => {
+  
+  const user = req.user;
+
+  if (!user) {
+    throw new APIError(403, "Unauthorized Access.");
+  }
+
+  let { name, profileURL, username } = req.body;
+
+  name = name || user.name;
+  profileURL = profileURL || user.profileURL;
+  username = username || user.username;
+
+  user.name = name;
+  user.profileURL = profileURL;
+  user.username = username;
+
+  await user.save({ validateBeforeSave: false });
+
+  return res.status(200).json(
+    new APIResponse(200, {}, "Profile Updated Successfully")
+  );
+});
+
 export {
   registerUser,
   checkEmailAvailability,
@@ -864,4 +894,5 @@ export {
   getEncryptedEmail,
   gmailLink,
   getMe,
+  profileUpdate
 };

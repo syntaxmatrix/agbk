@@ -13,6 +13,7 @@ import {
   getEncryptedEmail,
   getMe,
   gmailLink,
+  profileUpdate
 } from "../controllers/user.controller.js";
 import { getGoogleAuthURL } from "../integrations/Auth/auth.google.js";
 import { getGmailAuthURL } from "../integrations/Auth/gmail.google.js";
@@ -63,6 +64,9 @@ router.route("/logout").post(auth_middleware, logoutUser); // example.com/api/v1
 
 // Get current authenticated user
 router.route("/me").get(auth_middleware, getMe); // example.com/api/v1/user/me
+
+// Update user profile
+router.route("/updatedprofile").post(auth_middleware,profileUpdate); // example.com/api/v1/user/updatedprofile
 
 // SEND SECURITY CODE(OTP) TO LOGGED-IN USER for Sensitive Actions (like password change, etc.)
 router
