@@ -452,7 +452,7 @@ const registerUserGoogle = asyncHandler(async (req, res) => {
           .cookie("accessToken", accessToken, cookieOptions)
           .cookie("refreshToken", refreshToken, cookieOptions)
           .redirect(
-            `${process.env.FRONTEND_DOMAIN}/chats?message=${encodeURIComponent(messageSuccess)}`,
+            `https://${process.env.FRONTEND_DOMAIN}/chats?message=${encodeURIComponent(messageSuccess)}`,
           )
       );
     }
@@ -467,7 +467,7 @@ const registerUserGoogle = asyncHandler(async (req, res) => {
     return res
       .status(statusCode)
       .redirect(
-        `${process.env.FRONTEND_DOMAIN}/error?message=${encodeURIComponent(errorMessage)}`,
+        `https://${process.env.FRONTEND_DOMAIN}/error?message=${encodeURIComponent(errorMessage)}`,
       );
   }
 });
