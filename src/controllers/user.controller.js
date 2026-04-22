@@ -627,10 +627,8 @@ const gmailLink = asyncHandler(async (req, res) => {
         httpOnly: true,
         secure: true,
         sameSite: "Lax",
-        domain:
-          process.env.NODE_ENV === "production"
-            ? process.env.FRONTEND_DOMAIN
-            : undefined,
+        domain: process.env.FRONTEND_DOMAIN,
+
       };
       console.log("Linking Google Route End");
       return (
