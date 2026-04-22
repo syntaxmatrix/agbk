@@ -626,9 +626,7 @@ const gmailLink = asyncHandler(async (req, res) => {
       const options = {
         httpOnly: true,
         secure: true,
-        sameSite: "Lax",
-        domain: process.env.FRONTEND_DOMAIN,
-
+        sameSite: "none",
       };
       console.log("Linking Google Route End");
       return (
@@ -637,8 +635,8 @@ const gmailLink = asyncHandler(async (req, res) => {
           // Issue fresh auth cookies and redirect with linked state.
           .cookie("accessToken", accessToken, options)
           .cookie("refreshToken", refreshToken, options)
-          .redirect(`${process.env.FRONTEND_DOMAIN}?linked=true`)
-      );
+          .redirect(`https://${process.env.FRONTEND_DOMAIN}?linked=true`)
+        );
     }
   } catch (error) {
     console.error("Error In Google Linking:", error);
@@ -651,7 +649,7 @@ const gmailLink = asyncHandler(async (req, res) => {
     return res
       .status(statusCode)
       .redirect(
-        `${process.env.FRONTEND_DOMAIN}?error=${encodeURIComponent(errorMessage)}`,
+        `https://${process.env.FRONTEND_DOMAIN}?error=${encodeURIComponent(errorMessage)}`,
       );
   }
 });
