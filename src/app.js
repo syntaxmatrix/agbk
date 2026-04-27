@@ -74,11 +74,15 @@ app.use(
 import userRouter from "./routes/user.routes.js";
 import agentRouter from "./routes/agent.routes.js";
 import historyRouter from "./routes/history.routes.js";
+import adminRouter from "./routes/admin.routes.js";
+import adminEmailRouter from "./routes/admin.email.routes.js";
 
 //routes declarations
 app.use("/api/v1/user", userRouter); // example.com/api/v1/user/register
 app.use("/api/v1/agent", agentRouter); // example.com/api/v1/agent/test
 app.use("/api/v1/history", historyRouter); // Use the exact path requested by user
+app.use("/api/v1/admin", adminRouter); // example.com/api/v1/admin/users
+app.use("/api/v1/admin/email", adminEmailRouter); // example.com/api/v1/admin/email/send
 
 // Global Error Handler
 app.use((err, req, res, next) => {

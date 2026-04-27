@@ -18,6 +18,7 @@ const userSchema = new Schema(
       match:
         /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/g,
     },
+    role: { type: String, enum: ["Admin", "User"], default: "User" },
     username: { type: String, required: true, unique: true, index: true },
     password: { type: String, required: true },
     isVerified: { type: Boolean, default: false },

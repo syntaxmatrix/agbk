@@ -20,7 +20,7 @@ function cleanJsonString(str) {
 import Message from "../models/message.model.js";
 
 /**
- * Test Function for Gemini Response.
+ * intent check Function for Gemini Response.
  * @param {Object} req - Express request object.
  * @param {Object} res - Express response object.
  */
