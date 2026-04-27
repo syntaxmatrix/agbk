@@ -141,6 +141,23 @@ const getStats = async () => {
   };
 };
 
+const getAllUserEmailsForCsv = async () => {
+  const users = await User.find({ email: { $exists: true, $ne: "" } })
+    .select("email createdAt")
+    .sort({ createdAt: -1 })
+    .lean();
+
+  const uniqueEmails = [
+    ...new Set(
+      users
+        .map((user) => user.email?.trim())
+        .filter((email) => typeof email === "string" && email.length > 0),
+    ),
+  ];
+
+  return uniqueEmails;
+};
+
 const forceLogoutUser = async (id) => {
   if (!isValidObjectId(id)) {
     throw new APIError(400, "Invalid user id");
@@ -180,6 +197,7 @@ const logAdminAction = async ({
 export {
   VALID_SUBSCRIPTION_PLANS,
   getUsers,
+  getAllUserEmailsForCsv,
   getUserById,
   deleteUserAndMessages,
   updateSubscription,

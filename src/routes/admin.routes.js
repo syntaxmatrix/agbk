@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   deleteUser,
+  downloadUserEmailsCsv,
   forceLogout,
   getAdminStats,
   getSingleUser,
@@ -15,6 +16,7 @@ const router = Router();
 router.use(auth_middleware, adminOnly);
 
 router.route("/stats").get(getAdminStats);
+router.route("/users/emails/csv").get(downloadUserEmailsCsv);
 
 router.route("/users").get(listUsers);
 router.route("/users/:id").get(getSingleUser).delete(deleteUser);

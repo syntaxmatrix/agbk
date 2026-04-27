@@ -4,6 +4,7 @@ import { APIResponse } from "../utils/APIResponse.js";
 import {
   deleteUserAndMessages,
   forceLogoutUser,
+  getAllUserEmailsForCsv,
   getStats,
   getUserById,
   getUsers,
@@ -76,6 +77,31 @@ const getAdminStats = asyncHandler(async (req, res) => {
     .json(new APIResponse(200, stats, "Stats fetched successfully"));
 });
 
+const downloadUserEmailsCsv = asyncHandler(async (req, res) => {
+  const emails = await getAllUserEmailsForCsv();
+  const csvRows = [
+    "email",
+    ...emails.map((email) => `"${email.replace(/"/g, '""')}"`),
+  ];
+  const csvContent = csvRows.join("\n");
+
+  await logAdminAction({
+    adminId: req.user._id,
+    action: "EXPORT_USER_EMAILS_CSV",
+    metadata: {
+      exportedCount: emails.length,
+    },
+  });
+
+  res.setHeader("Content-Type", "text/csv; charset=utf-8");
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename="users-emails-${Date.now()}.csv"`,
+  );
+
+  return res.status(200).send(csvContent);
+});
+
 const forceLogout = asyncHandler(async (req, res) => {
   const user = await forceLogoutUser(req.params.id);
 
@@ -96,5 +122,6 @@ export {
   deleteUser,
   patchUserSubscription,
   getAdminStats,
+  downloadUserEmailsCsv,
   forceLogout,
 };
