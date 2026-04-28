@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon -r dotenv/config  src/index.js",
-    "start": "node -r dotenv/config src/index.js"
+    "start": "node -r dotenv/config src/index.js",
+    "backfill:conversation-titles": "node scripts/backfill-conversation-titles.js"
   },
   "repository": {
     "type": "git",

@@ -4,6 +4,11 @@ import { APIResponse } from "../utils/APIResponse.js";
 import { routeQuery, chatQuery, draftMail } from "../agents/gemini.js";
 import { sendgmail } from "../integrations/Google/gmail.js";
 import { oauth2ClientGmail } from "../integrations/Auth/gmail.google.js";
+import Conversation from "../models/conversation.model.js";
+import {
+  buildConversationTitle,
+  normalizeConversationTitle,
+} from "../utils/conversationTitle.js";
 
 /**
  * Function to remove unwanted string to convert JSON.
@@ -31,6 +36,27 @@ const intentCheck = asyncHandler(async (req, res) => {
 
     if (!conversationId) {
       throw new APIError(400, "conversationId is required");
+    }
+
+    const normalizedQuery = normalizeConversationTitle(q);
+    const initialTitle = buildConversationTitle(normalizedQuery);
+    const conversation = await Conversation.findOne({
+      userId: req.user._id,
+      conversationId,
+    });
+
+    if (!conversation) {
+      await Conversation.create({
+        userId: req.user._id,
+        conversationId,
+        title: initialTitle,
+      });
+    } else {
+      if (!conversation.title || !conversation.title.trim()) {
+        conversation.title = initialTitle;
+      }
+      conversation.updatedAt = new Date();
+      await conversation.save();
     }
 
     // [MODIFICATION] Save User Message EARLY
