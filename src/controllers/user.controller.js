@@ -635,7 +635,7 @@ const gmailLink = asyncHandler(async (req, res) => {
           // Issue fresh auth cookies and redirect with linked state.
           .cookie("accessToken", accessToken, options)
           .cookie("refreshToken", refreshToken, options)
-          .redirect(`https://${process.env.FRONTEND_DOMAIN}?linked=true`)
+          .redirect(`https://${process.env.FRONTEND_DOMAIN}/account?linked=true&message=${encodeURIComponent("Google account linked successfully")}`)
         );
     }
   } catch (error) {
@@ -649,7 +649,7 @@ const gmailLink = asyncHandler(async (req, res) => {
     return res
       .status(statusCode)
       .redirect(
-        `https://${process.env.FRONTEND_DOMAIN}?error=${encodeURIComponent(errorMessage)}`,
+        `https://${process.env.FRONTEND_DOMAIN}/account?linked=false&message=${encodeURIComponent(errorMessage)}`,
       );
   }
 });
