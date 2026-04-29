@@ -7,6 +7,7 @@ import jwt from "jsonwebtoken";
 import {
   sendVerificationEmail,
   sendSecurityCodeMail,
+  sendWelcomeEmail,
 } from "../integrations/emails/email.resend.js";
 import { oauth2Client } from "../integrations/Auth/auth.google.js";
 import { oauth2ClientGmail } from "../integrations/Auth/gmail.google.js";
@@ -266,12 +267,27 @@ const verifyEmailID = asyncHandler(async (req, res) => {
     // Save changes to database
     await user.save({ validateBeforeSave: false }); // Set validateBeforeSave to false if verifyCode/Expiry are being unset
 
+    //Email Sending Using Resend
+    try {
+      // Send Welcome email to user's email inbox.
+      await sendWelcomeEmail(email, name);
+      console.log(`Welcome email sent to ${email}`);
+    } catch (err) {
+      console.error(`Email sending failed: ${err.message}`);
+      throw new APIError(
+        500,
+        "User registered but failed to send welcome email",
+      );
+    }
+
     return (
       res
         .status(200)
         // Clear tempToken after success so OTP flow cannot be replayed.
         .clearCookie("tempToken", cookieOptions)
-        .json(new APIResponse(200, {}, "User is successfully verified"))
+        .redirect(
+          `https://${process.env.FRONTEND_DOMAIN}/account?linked=true&message=${encodeURIComponent("Your account is successfully verified")}`,
+        )
     );
   }
   throw new APIError(400, "Invalid verification code");
@@ -441,6 +457,18 @@ const registerUserGoogle = asyncHandler(async (req, res) => {
 
       if (result.lastErrorObject?.updatedExisting === false) {
         messageSuccess = "User Registered Successfully  with Google";
+        //Email Sending Using Resend
+        try {
+          // Send Welcome email to user's email inbox.
+          await sendWelcomeEmail(email, name);
+          console.log(`Welcome email sent to ${email}`);
+        } catch (err) {
+          console.error(`Email sending failed: ${err.message}`);
+          throw new APIError(
+            500,
+            "User registered but failed to send welcome email",
+          );
+        }
       } else {
         messageSuccess = "User Logged In Successfully";
       }
@@ -452,7 +480,7 @@ const registerUserGoogle = asyncHandler(async (req, res) => {
           .cookie("accessToken", accessToken, cookieOptions)
           .cookie("refreshToken", refreshToken, cookieOptions)
           .redirect(
-            `https://${process.env.FRONTEND_DOMAIN}/chats?message=${encodeURIComponent(messageSuccess)}`,
+            `https://${process.env.FRONTEND_DOMAIN}/account?linked=true&message=${encodeURIComponent(messageSuccess)}`,
           )
       );
     }
@@ -635,8 +663,10 @@ const gmailLink = asyncHandler(async (req, res) => {
           // Issue fresh auth cookies and redirect with linked state.
           .cookie("accessToken", accessToken, options)
           .cookie("refreshToken", refreshToken, options)
-          .redirect(`https://${process.env.FRONTEND_DOMAIN}/account?linked=true&message=${encodeURIComponent("Google account linked successfully")}`)
-        );
+          .redirect(
+            `https://${process.env.FRONTEND_DOMAIN}/account?linked=true&message=${encodeURIComponent("Google account linked successfully")}`,
+          )
+      );
     }
   } catch (error) {
     console.error("Error In Google Linking:", error);
@@ -852,7 +882,6 @@ const passwordReset = asyncHandler(async (req, res) => {
  * @param {Object} res - Express response object.
  */
 const profileUpdate = asyncHandler(async (req, res) => {
-  
   const user = req.user;
 
   if (!user) {
@@ -871,9 +900,9 @@ const profileUpdate = asyncHandler(async (req, res) => {
 
   await user.save({ validateBeforeSave: false });
 
-  return res.status(200).json(
-    new APIResponse(200, {}, "Profile Updated Successfully")
-  );
+  return res
+    .status(200)
+    .json(new APIResponse(200, {}, "Profile Updated Successfully"));
 });
 
 export {
@@ -890,5 +919,5 @@ export {
   getEncryptedEmail,
   gmailLink,
   getMe,
-  profileUpdate
+  profileUpdate,
 };
