@@ -89,7 +89,7 @@ const intentCheck = asyncHandler(async (req, res) => {
       ans = await chatQ(q, context);
     } else if (text.route === "gmail_agent") {
       // Gmail-specific intents like draft/send email.
-      ans = await GmailAgent(text, q, googleRefreshToken, context);
+      ans = await GmailAgent(text, q, googleRefreshToken, context, req.user.name);
     } else {
       // Fallback when model route is unknown.
       ans = "No valid route found in the response.";
@@ -158,16 +158,18 @@ async function chatQ(query, context) {
   }
 }
 
-async function GmailAgent(text, query, googleRefreshToken, context) {
+async function GmailAgent(text, query, googleRefreshToken, context, myname) {
   if (text.intent === "draft_email") {
     // Draft only: generate subject/body, do not send.
     return await draftMail(
       `${context ? "Chat History:\n" + context + "\n\n" : ""}User request: ${query}`,
+      myname // Pass the logged-in user's name
     );
   } else if (text.intent === "send_email") {
     // Build email content first from user intent.
     const emailContent = await draftMail(
       `${context ? "Chat History:\n" + context + "\n\n" : ""}User request: ${query}`,
+      myname // Pass the logged-in user's name
     );
     // Handle send email logic using emailContent
     // Send via Gmail integration using stored refresh token for auth.

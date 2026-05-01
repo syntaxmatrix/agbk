@@ -131,7 +131,7 @@ User query: "${query}"
   }
 }
 
-async function draftMail(query) {
+async function draftMail(query,myname) {
   const response = await ai.models.generateContent({
     model: model_chat,
 
@@ -154,6 +154,7 @@ Guidelines:
 - Add greeting and closing.
 - Infer subject if not given.
 - Do not include anything outside JSON.
+- Use "${myname}" as the sender's name in the email.
 
 User request: "${query}"
 `,
