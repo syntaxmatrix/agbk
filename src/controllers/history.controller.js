@@ -6,6 +6,10 @@ import {
   DEFAULT_CONVERSATION_TITLE,
   buildConversationTitle,
 } from "../utils/conversationTitle.js";
+import {
+  getMessageTextContent,
+  normalizeAiContent,
+} from "../utils/messageContent.js";
 
 export const getRecentConversations = asyncHandler(async (req, res) => {
   const userId = new mongoose.Types.ObjectId(req.user._id);
@@ -94,7 +98,7 @@ export const getRecentConversations = asyncHandler(async (req, res) => {
     return {
       _id: conversation._id,
       title,
-      latestMessage: conversation.latestMessage,
+      latestMessage: getMessageTextContent(conversation.latestMessage),
       updatedAt: conversation.updatedAt,
     };
   });
@@ -114,5 +118,14 @@ export const getChatById = asyncHandler(async (req, res) => {
     createdAt: 1,
   });
 
-  res.json({ ok: true, messages });
+  res.json({
+    ok: true,
+    messages: messages.map((message) => ({
+      ...message.toObject(),
+      content:
+        message.role === "ai"
+          ? normalizeAiContent(message.content)
+          : message.content,
+    })),
+  });
 });

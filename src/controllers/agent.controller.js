@@ -1,6 +1,5 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { APIError } from "../utils/APIError.js";
-import { APIResponse } from "../utils/APIResponse.js";
 import { routeQuery, chatQuery, draftMail } from "../agents/gemini.js";
 import { sendgmail } from "../integrations/Google/gmail.js";
 import { oauth2ClientGmail } from "../integrations/Auth/gmail.google.js";
@@ -9,18 +8,11 @@ import {
   buildConversationTitle,
   normalizeConversationTitle,
 } from "../utils/conversationTitle.js";
-
-/**
- * Function to remove unwanted string to convert JSON.
- * @param {string} str
- * @returns {string}
- */
-function cleanJsonString(str) {
-  return str
-    .replace(/```json\s*/i, "") // remove opening ```json
-    .replace(/```$/, "") // remove closing ```
-    .trim(); // clean extra spaces
-}
+import {
+  buildEmailContent,
+  getMessageTextContent,
+  normalizeAiContent,
+} from "../utils/messageContent.js";
 
 import Message from "../models/message.model.js";
 
@@ -74,7 +66,10 @@ const intentCheck = asyncHandler(async (req, res) => {
       .limit(10);
     const context = history
       .reverse()
-      .map((m) => `${m.role === "ai" ? "Assistant" : "User"}: ${m.content}`)
+      .map(
+        (m) =>
+          `${m.role === "ai" ? "Assistant" : "User"}: ${getMessageTextContent(m.content)}`,
+      )
       .join("\n");
 
     // Logged-in user's Gmail refresh token, used for Gmail actions.
@@ -95,16 +90,22 @@ const intentCheck = asyncHandler(async (req, res) => {
       ans = "No valid route found in the response.";
     }
 
+    const normalizedAnswer = normalizeAiContent(ans);
+
     // Save AI Message
     await Message.create({
       userId: req.user._id,
       role: "ai",
-      content: ans || "No answer generated",
+      content: normalizedAnswer || "No answer generated",
       conversationId,
     });
 
     // Return both routing metadata and generated answer.
-    res.json({ ok: true, text: text, ans: ans || "No answer generated" });
+    res.json({
+      ok: true,
+      text: text,
+      ans: normalizedAnswer || "No answer generated",
+    });
   } catch (err) {
     console.error("/gen error", err);
     let message = err?.message || "Unknown error";
@@ -152,7 +153,7 @@ async function chatQ(query, context) {
     const text = await chatQuery(
       `${context ? "Chat History:\n" + context + "\n\n" : ""}User: ${query}`,
     );
-    return text;
+    return normalizeAiContent(text);
   } catch (err) {
     console.error("/chat error", err);
   }
@@ -161,10 +162,16 @@ async function chatQ(query, context) {
 async function GmailAgent(text, query, googleRefreshToken, context, myname) {
   if (text.intent === "draft_email") {
     // Draft only: generate subject/body, do not send.
-    return await draftMail(
+    const emailContent = await draftMail(
       `${context ? "Chat History:\n" + context + "\n\n" : ""}User request: ${query}`,
       myname // Pass the logged-in user's name
     );
+    return buildEmailContent({
+      status: "draft",
+      to: emailContent.to || text?.entities?.to || "",
+      subject: emailContent.subject,
+      body: emailContent.body,
+    });
   } else if (text.intent === "send_email") {
     // Build email content first from user intent.
     const emailContent = await draftMail(
@@ -180,11 +187,13 @@ async function GmailAgent(text, query, googleRefreshToken, context, myname) {
       emailContent.body,
       googleRefreshToken,
     );
-    const res = {
-      body: "Email sent successfully! to " + text.entities.to,
-      data: data,
-    };
-    return res;
+    return buildEmailContent({
+      status: "sent",
+      to: text?.entities?.to || emailContent.to || "",
+      subject: emailContent.subject,
+      body: emailContent.body,
+      labelIds: data?.labelIds || ["SENT"],
+    });
   } else if (text.intent === "read_email") {
     // Handle read email logic
   } else {
