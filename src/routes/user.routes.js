@@ -48,7 +48,7 @@ router.route("/otp").post(verifyTurnstile, sendSecurityCodeForgetPassword); // e
 router.route("/verifyemail").post(verifyEmailID); // example.com/api/v1/user/verifyemail
 
 // GOOGLE OAUTH2 LOGIN
-router.route("/google").get(getGoogleAuthURL); // example.com/api/v1/user/google
+router.route("/google").get(verifyTurnstile, getGoogleAuthURL); // example.com/api/v1/user/google
 
 // Google OAuth2 callback route
 router.route("/google/callback").get(registerUserGoogle); // example.com/api/v1/user/google/callback
