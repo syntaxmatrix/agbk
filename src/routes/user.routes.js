@@ -13,12 +13,13 @@ import {
   getEncryptedEmail,
   getMe,
   gmailLink,
-  profileUpdate
+  profileUpdate,
 } from "../controllers/user.controller.js";
 import { getGoogleAuthURL } from "../integrations/Auth/auth.google.js";
 import { getGmailAuthURL } from "../integrations/Auth/gmail.google.js";
 import { getEmail } from "../middlewares/email.js";
 import { auth_middleware } from "../middlewares/auth.js";
+import { verifyTurnstile } from "../middlewares/turnstile.js";
 
 const router = Router();
 
@@ -31,13 +32,13 @@ router.route("/emailavailability").get(checkEmailAvailability); // example.com/a
 router.route("/usernameavailability").get(checkUsernameAvailability); // example.com/api/v1/user/usernameavailabilityusername=rahul
 
 // REGISTER USER
-router.route("/register").post(registerUser); // example.com/api/v1/user/register
+router.route("/register").post(verifyTurnstile, registerUser); // example.com/api/v1/user/register
 
 // LOGIN USER
-router.route("/login").post(loginUser); // example.com/api/v1/user/login
+router.route("/login").post(verifyTurnstile, loginUser); // example.com/api/v1/user/login
 
 // Request Security Code(OTP) for Forget Password Only
-router.route("/otp").post(sendSecurityCodeForgetPassword); // example.com/api/v1/user/otp
+router.route("/otp").post(verifyTurnstile, sendSecurityCodeForgetPassword); // example.com/api/v1/user/otp
 
 // ## Unsecured Routes #Ends
 
@@ -53,7 +54,7 @@ router.route("/google").get(getGoogleAuthURL); // example.com/api/v1/user/google
 router.route("/google/callback").get(registerUserGoogle); // example.com/api/v1/user/google/callback
 
 // PASSWORD RESET
-router.route("/passwordreset").post(passwordReset); // example.com/api/v1/user/passwordreset
+router.route("/passwordreset").post(verifyTurnstile, passwordReset); // example.com/api/v1/user/passwordreset
 
 //#Semi-Secured Route #Ends
 
@@ -66,7 +67,7 @@ router.route("/logout").post(auth_middleware, logoutUser); // example.com/api/v1
 router.route("/me").get(auth_middleware, getMe); // example.com/api/v1/user/me
 
 // Update user profile
-router.route("/updatedprofile").put(auth_middleware,profileUpdate); // example.com/api/v1/user/updatedprofile
+router.route("/updatedprofile").put(auth_middleware, profileUpdate); // example.com/api/v1/user/updatedprofile
 
 // SEND SECURITY CODE(OTP) TO LOGGED-IN USER for Sensitive Actions (like password change, etc.)
 router
