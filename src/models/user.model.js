@@ -28,7 +28,7 @@ const userSchema = new Schema(
     subscription: {
       type: String,
       enum: ["Free", "Premium", "Ultimate"],
-      default: "Premium",
+      default: "Free",
     },
     subscriptionExpiry: {
       type: Date,
