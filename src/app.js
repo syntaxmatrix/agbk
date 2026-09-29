@@ -2,7 +2,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import session from "express-session";
-import restrictToIndia from "./middlewares/restrictToIndia.js";
+import {restrictToIndia }from "./middlewares/restrictToIndia.js";
 
 const app = express();
 
@@ -21,7 +21,7 @@ const devOrigins = [
 ];
 
 // Register as global middleware
-// app.use(restrictToIndia);
+app.use(restrictToIndia);
 
 app.use(
   cors({
