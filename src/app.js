@@ -21,7 +21,7 @@ const devOrigins = [
 ];
 
 // Register as global middleware
-app.use(restrictToIndia);
+// app.use(restrictToIndia);
 
 app.use(
   cors({
